@@ -2289,6 +2289,11 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
         thumbFile.addEventListener('change', function(){ if(this.files[0]) applyThumb(this.files[0]); });
 
         function uploadFileToServer(file) {
+          /* Videos go directly to Cloudinary (bypasses Vercel's 4.5MB limit) */
+          if (file.type && file.type.startsWith('video/')) {
+            return uploadDirectToCloudinary(file);
+          }
+          /* Images go through our server endpoint */
           return new Promise(function(resolve, reject) {
             var fd = new FormData();
             fd.append('password', PASS);
@@ -2299,10 +2304,31 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
             }).then(function(r) { return r.json(); })
               .then(function(res) {
                  if(res.success && res.paths && res.paths[0]) {
-                   resolve(res.paths[0]); // e.g., 'proyectos/1234-img.png'
+                   resolve(res.paths[0]);
                  } else {
                    reject(new Error(res.error || 'Upload failed'));
                  }
+              }).catch(reject);
+          });
+        }
+
+        /* Direct browser-to-Cloudinary upload (no server middleman) */
+        function uploadDirectToCloudinary(file) {
+          return new Promise(function(resolve, reject) {
+            var fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', 'portfolio_unsigned');
+            var resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+            fetch('https://api.cloudinary.com/v1_1/dawlnfalb/' + resourceType + '/upload', {
+              method: 'POST',
+              body: fd
+            }).then(function(r) { return r.json(); })
+              .then(function(res) {
+                if (res.secure_url) {
+                  resolve(res.secure_url);
+                } else {
+                  reject(new Error(res.error ? res.error.message : 'Cloudinary upload failed'));
+                }
               }).catch(reject);
           });
         }
