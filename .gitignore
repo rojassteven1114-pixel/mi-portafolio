@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.local
+database.sqlite
+proyectos/
+uploads/
+.DS_Store

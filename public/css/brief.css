@@ -1,0 +1,330 @@
+/* CSS for Client Briefing Form */
+:root {
+  --primary-color: #9b59f5; /* Purple */
+  --primary-hover: #c8aaff;
+  --bg-dark: #080414; /* Same as portfolio base */
+  --bg-panel: #120926; /* Fondo sólido sin transparencia */
+  --text-main: #e6e0f5;
+  --text-muted: #a090c0;
+  --border-color: rgba(155, 89, 245, 0.2);
+  --error: #ef4444;
+  --success: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-main);
+  background-color: transparent;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.brief-container {
+  display: flex;
+  background: var(--bg-panel);
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+/* Sidebar Tracker */
+.tracker {
+  width: 35%;
+  background: #0d061c;
+  padding: 1.8rem 1.5rem;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tracker .logo {
+  font-weight: 800;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.tracker h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+  background: linear-gradient(135deg, #c8aaff, #9b59f5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.2;
+}
+
+.tracker p {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
+}
+
+.steps-tracker {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.step {
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 2rem;
+  transition: all 0.3s ease;
+}
+
+.step::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  color: var(--text-main);
+  font-weight: 800;
+}
+
+.step.active::before {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Form Area */
+.form-area {
+  width: 65%;
+  padding: 1.8rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-step {
+  display: none;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.form-step.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-step h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 1.2rem;
+  color: var(--text-main);
+}
+
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.input-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+/* File Drop Area */
+.file-drop-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.2rem 1rem;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.3);
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.file-drop-area:hover {
+  border-color: var(--primary-color);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.file-msg {
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.file-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  opacity: 0;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Keep 'Siguiente' aligned to right if it's the only button */
+.actions .next-btn:first-child {
+  margin-left: auto;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.next-btn, .cta-btn {
+  background: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+}
+
+.next-btn:hover:not(:disabled), .cta-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.notification-area {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  display: none;
+}
+
+.notification-area.success {
+  display: block;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.notification-area.error {
+  display: block;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body {
+    padding: 0;
+  }
+  .brief-container {
+    flex-direction: column;
+    border-radius: 0;
+    border: none;
+    min-height: 100vh;
+  }
+  .tracker {
+    width: 100%;
+    padding: 2rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .steps-tracker {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  .step {
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+  .form-area {
+    width: 100%;
+    padding: 2rem 1rem;
+  }
+}

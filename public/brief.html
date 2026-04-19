@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Briefing de Diseño | Mi Portafolio</title>
+    <link rel="stylesheet" href="/css/brief.css">
+    <!-- Google Fonts: Inter & Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="brief-container">
+        
+        <!-- Sidebar Tracker -->
+        <div class="tracker">
+            <div class="logo">Mi Portafolio</div>
+            <h2>Ficha de Proyecto</h2>
+            <p>Cuéntanos sobre tu negocio y lo que necesitas para que podamos empezar a diseñar.</p>
+            
+            <ul class="steps-tracker">
+                <li class="step active" data-target="1">1. Información Básica</li>
+                <li class="step" data-target="2">2. Sobre el Proyecto</li>
+                <li class="step" data-target="3">3. Estilo y Visual</li>
+                <li class="step" data-target="4">4. Logística y Envío</li>
+            </ul>
+        </div>
+
+        <!-- Form Area -->
+        <form id="briefForm" class="form-area" enctype="multipart/form-data">
+            
+            <!-- Step 1: Info Básica -->
+            <div class="form-step active" id="step1">
+                <h3>1. Información Básica</h3>
+                <div class="input-group">
+                    <label for="clientName">Tu Nombre Completo *</label>
+                    <input type="text" id="clientName" name="clientName" required placeholder="Ej. Juan Pérez">
+                </div>
+                <div class="input-group">
+                    <label for="businessName">Nombre del Negocio/Marca *</label>
+                    <input type="text" id="businessName" name="businessName" required placeholder="Ej. TechSolutions">
+                </div>
+                <div class="input-group">
+                    <label for="projectType">Tipo de Proyecto *</label>
+                    <select id="projectType" name="projectType" required>
+                        <option value="" disabled selected>Selecciona una opción</option>
+                        <option value="Logo/Branding">Diseño de Logo / Branding</option>
+                        <option value="Redes Sociales">Gráficas para Redes Sociales</option>
+                        <option value="Web/UI">Diseño Web / App</option>
+                        <option value="Papeleria">Papelería / Print</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn next-btn">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Sobre el Proyecto -->
+            <div class="form-step" id="step2">
+                <h3>2. Sobre el Proyecto</h3>
+                <div class="input-group">
+                    <label for="description">Descripción del Proyecto *</label>
+                    <textarea id="description" name="description" rows="4" required placeholder="¿De qué trata este proyecto de diseño?"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="audience">Público Objetivo</label>
+                    <input type="text" id="audience" name="audience" placeholder="¿A quién le estamos vendiendo? (Ej: Jóvenes 18-25)">
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn prev-btn btn-secondary">Atrás</button>
+                    <button type="button" class="btn next-btn">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Estilo y Visual -->
+            <div class="form-step" id="step3">
+                <h3>3. Estilo y Visual</h3>
+                <div class="input-group">
+                    <label for="colors">Colores Preferidos</label>
+                    <input type="text" id="colors" name="colors" placeholder="Ej. Azul oscuro, dorado, o 'no tengo idea'">
+                </div>
+                <div class="input-group">
+                    <label for="style">Estilo Visual</label>
+                    <select id="style" name="style">
+                        <option value="Minimalista">Minimalista</option>
+                        <option value="Moderno">Moderno</option>
+                        <option value="Elegante">Elegante</option>
+                        <option value="Llamativo">Llamativo / Colorido</option>
+                        <option value="Retro">Retro / Vintage</option>
+                        <option value="Lo dejo a tu criterio">Lo dejo a tu criterio</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="referencesLink">Links de Referencia (Opcional)</label>
+                    <textarea id="referencesLink" name="referencesLink" rows="2" placeholder="Pega aquí links de Pinterest, Behance, o webs que te gusten"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Archivos Adjuntos (Fotos, logos actuales, ideas)</label>
+                    <div class="file-drop-area">
+                        <span class="file-msg">Arrastra tus archivos aquí o haz clic para subir</span>
+                        <input class="file-input" type="file" name="attachments" multiple accept="image/*,.pdf">
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn prev-btn btn-secondary">Atrás</button>
+                    <button type="button" class="btn next-btn">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Logística y Envío -->
+            <div class="form-step" id="step4">
+                <h3>4. Logística y Envío</h3>
+                <div class="input-group">
+                    <label for="competitors">Competencia Principal</label>
+                    <input type="text" id="competitors" name="competitors" placeholder="¿Quiénes son tus mayores competidores?">
+                </div>
+                <div class="input-group">
+                    <label for="deadline">Fecha Límite Esperada</label>
+                    <input type="date" id="deadline" name="deadline">
+                </div>
+                <div class="input-group">
+                    <label for="budget">Presupuesto Estimado (Opcional)</label>
+                    <input type="text" id="budget" name="budget" placeholder="Ej. $100 - $300 USD">
+                </div>
+                
+                <div class="notification-area" id="notificationObj"></div>
+
+                <div class="actions">
+                    <button type="button" class="btn prev-btn btn-secondary">Atrás</button>
+                    <button type="submit" class="btn cta-btn">Enviar Ficha</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Script for interaction -->
+    <script src="/js/brief.js"></script>
+</body>
+</html>

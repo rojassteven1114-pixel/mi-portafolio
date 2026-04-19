@@ -1,0 +1,68 @@
+[
+  {
+    "label": "Identidad de Marca - TEST",
+    "cat": "Branding",
+    "title": "Identidad de Marca - TEST",
+    "desc": "Desarrollo integral de identidad visual para marcas: logotipos, paletas de color, tipografía y manual de marca. Cada proyecto busca transmitir la esencia del negocio con un lenguaje visual sólido y memorable.",
+    "tags": "CorelDRAW,Illustrator,Branding,Logotipos",
+    "thumb": "proyectos/1776618357498-1776618346513-banner1.png",
+    "modalImg": "proyectos/1776618357498-1776618346513-banner1.png",
+    "pages": "proyectos/1776618346513-banner1.png",
+    "video": ""
+  },
+  {
+    "label": "Carruseles de Instagram",
+    "cat": "Redes Sociales",
+    "title": "Carruseles de Instagram",
+    "desc": "Diseño de carruseles informativos y promocionales con narrativa visual coherente. Cada slide está pensado para mantener al usuario deslizando, maximizando el alcance y la interacción.",
+    "tags": "Canva,Instagram,Diseño Editorial,Marketing",
+    "thumb": "proyectos/carrusel1.png",
+    "modalImg": "proyectos/carrusel1.png",
+    "pages": "proyectos/carrusel2.png,proyectos/carrusel3.png,proyectos/carrusel4.png,proyectos/carrusel5.png,proyectos/carrusel6.png,proyectos/carrusel7.png,proyectos/carrusel8.png",
+    "video": ""
+  },
+  {
+    "label": "Reels & Short-Form",
+    "cat": "Video & Producción",
+    "title": "Reels & Short-Form",
+    "desc": "Producción y edición de reels y videos cortos para Instagram y TikTok. Transiciones dinámicas, ritmo sincronizado con audio y hooks visuales que capturan la atención en los primeros 3 segundos.",
+    "tags": "CapCut,Premiere,Instagram,TikTok",
+    "thumb": "proyectos/project3.jpg",
+    "modalImg": "proyectos/project3.jpg",
+    "pages": "",
+    "video": "proyectos/reel_volantes.mp4"
+  },
+  {
+    "label": "Miniaturas de YouTube",
+    "cat": "Diseño Gráfico",
+    "title": "Miniaturas de YouTube",
+    "desc": "Diseño de thumbnails llamativos y optimizados para CTR en YouTube. Composiciones con tipografía bold, colores contrastantes y expresiones que generan curiosidad e impulsan los clics.",
+    "tags": "Photoshop,CorelDRAW,YouTube,CTR",
+    "thumb": "proyectos/proximamente3.png",
+    "modalImg": "proyectos/proximamente3.png",
+    "pages": "",
+    "video": ""
+  },
+  {
+    "label": "Anuncios & Ads",
+    "cat": "Publicidad Digital",
+    "title": "Anuncios & Ads",
+    "desc": "Creación de piezas publicitarias para campañas en redes sociales y Google Ads. Diseños que combinan copywriting persuasivo con composición visual estratégica para maximizar conversiones.",
+    "tags": "Canva,Photoshop,Meta Ads,Google Ads",
+    "thumb": "proyectos/proximamente5.png",
+    "modalImg": "proyectos/proximamente5.png",
+    "pages": "",
+    "video": ""
+  },
+  {
+    "label": "Packaging & Etiquetas",
+    "cat": "Diseño de Producto",
+    "title": "Packaging & Etiquetas",
+    "desc": "Diseño de empaques, etiquetas y presentación de producto. Desde el concepto hasta el arte final listo para impresión, cuidando cada detalle para destacar en el punto de venta.",
+    "tags": "Illustrator,CorelDRAW,Packaging,Impresión",
+    "thumb": "proyectos/proximamente4.png",
+    "modalImg": "proyectos/proximamente4.png",
+    "pages": "",
+    "video": ""
+  }
+]
