@@ -2149,6 +2149,76 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
   /* objectURL store: keeps blob URLs alive per project index */
   var _blobThumb = {}, _blobPages = {}, _blobVideo = {};
 
+  /* ── Helper: capture a frame from a local video File ── */
+  function captureVideoFrame(file, idx) {
+    var videoEl = document.createElement('video');
+    videoEl.muted = true;
+    videoEl.preload = 'auto';
+    var objUrl = URL.createObjectURL(file);
+    videoEl.src = objUrl;
+    videoEl.addEventListener('loadeddata', function() {
+      videoEl.currentTime = Math.min(1, videoEl.duration / 4); // grab frame at 25% or 1s
+    });
+    videoEl.addEventListener('seeked', function() {
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.width = videoEl.videoWidth;
+        canvas.height = videoEl.videoHeight;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(videoEl, 0, 0);
+        canvas.toBlob(function(blob) {
+          URL.revokeObjectURL(objUrl);
+          if (!blob) return;
+          /* Auto-set as thumbnail preview (local only, user can click the button to upload) */
+          var previewUrl = URL.createObjectURL(blob);
+          var dz2 = document.getElementById('aDZ' + idx);
+          var dzH2 = document.getElementById('aDHint' + idx);
+          if (dz2 && !_blobThumb[idx]) {
+            dz2.style.backgroundImage = "url('" + previewUrl + "')";
+            if(dzH2) dzH2.style.display = 'none';
+          }
+        }, 'image/png');
+      } catch(e) { URL.revokeObjectURL(objUrl); }
+    });
+  }
+
+  /* ── Helper: capture a frame from a remote video URL (Cloudinary etc) ── */
+  function captureFrameFromUrl(videoSrc, callback) {
+    var videoEl = document.createElement('video');
+    videoEl.muted = true;
+    videoEl.crossOrigin = 'anonymous';
+    videoEl.preload = 'auto';
+    videoEl.src = videoSrc;
+    videoEl.addEventListener('loadeddata', function() {
+      videoEl.currentTime = Math.min(1, videoEl.duration / 4);
+    });
+    videoEl.addEventListener('seeked', function() {
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.width = videoEl.videoWidth;
+        canvas.height = videoEl.videoHeight;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(videoEl, 0, 0);
+        canvas.toBlob(function(blob) {
+          // Convert blob to a File so uploadFileToServer works
+          if (blob) {
+            var frameFile = new File([blob], 'video-frame-' + Date.now() + '.png', { type: 'image/png' });
+            callback(frameFile);
+          } else {
+            callback(null);
+          }
+        }, 'image/png');
+      } catch(e) {
+        console.error('Error capturando frame:', e);
+        callback(null);
+      }
+    });
+    videoEl.addEventListener('error', function() {
+      console.error('Error cargando video para frame');
+      callback(null);
+    });
+  }
+
   function buildGrid() {
     var data = loadData();
     grid.innerHTML = '';
@@ -2190,7 +2260,12 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
           '<div class="admin-field"><span class="admin-label" style="display:flex;align-items:center;justify-content:space-between;">Video (opcional)' +
           '<label class="admin-pick-btn" for="aVideoFile'+idx+'">Seleccionar</label></span>' +
           '<input type="file" id="aVideoFile'+idx+'" accept="video/*" style="display:none"/>' +
-          '<div class="admin-video-name" id="aVName'+idx+'">'+(p.video?'📹 '+ p.video:'')+'</div></div>' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+            '<div class="admin-video-name" id="aVName'+idx+'" style="flex:1">'+(p.video?'📹 '+ (p.video.length > 50 ? p.video.substring(p.video.lastIndexOf('/')+1) : p.video):'')+'</div>' +
+            '<button class="admin-pick-btn" id="aVDel'+idx+'" style="background:#e74c3c;color:#fff;cursor:pointer;border:none;padding:4px 10px;border-radius:4px;font-size:.75rem;'+(p.video?'':'display:none;')+'" title="Eliminar video">✕ Quitar</button>' +
+          '</div>' +
+          '<button class="admin-pick-btn" id="aVFrame'+idx+'" style="margin-top:6px;background:#2ecc71;color:#fff;cursor:pointer;border:none;padding:6px 12px;border-radius:4px;font-size:.75rem;'+(p.video?'':'display:none;')+'" title="Usar un frame del video como miniatura">🎞️ Usar frame como miniatura</button>' +
+          '</div>' +
           /* Save & Delete */
           '<div class="admin-actions">' +
             '<button class="admin-save-btn" id="aSave'+idx+'">💾 Guardar proyecto '+(idx+1)+'</button>' +
@@ -2310,19 +2385,66 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
         /* ── Video picker ── */
         var videoFile = document.getElementById('aVideoFile' + idx);
         var vName     = document.getElementById('aVName'     + idx);
+        var vDelBtn   = document.getElementById('aVDel'      + idx);
+        var vFrameBtn = document.getElementById('aVFrame'    + idx);
 
         videoFile.addEventListener('change', function(){
           var f = this.files[0]; if(!f) return;
           /* Clean up previous video reference */
           delete _blobVideo[idx];
-          vName.textContent = '📹 Subiendo...';
+          vName.textContent = '📹 Subiendo video... (puede tardar)';
+          vDelBtn.style.display = 'none';
+          vFrameBtn.style.display = 'none';
+
           uploadFileToServer(f).then(function(path){
             _blobVideo[idx] = { url: path, name: f.name, isBlob: false };
             vName.textContent = '📹 ' + f.name;
+            vDelBtn.style.display = '';
+            vFrameBtn.style.display = '';
             _hasUnsaved = true;
+
+            /* Auto-capture frame for thumbnail preview */
+            captureVideoFrame(f, idx);
           }).catch(function(e) { 
-            vName.textContent = '❌ Error';
-            alert('Error: ' + e.message); 
+            vName.textContent = '❌ Error al subir: ' + e.message;
+            alert('Error subiendo video: ' + e.message); 
+          });
+        });
+
+        /* ── Delete video button ── */
+        vDelBtn.addEventListener('click', function(){
+          delete _blobVideo[idx];
+          vName.textContent = '';
+          vDelBtn.style.display = 'none';
+          vFrameBtn.style.display = 'none';
+          videoFile.value = '';
+          _hasUnsaved = true;
+        });
+
+        /* ── Use video frame as thumbnail button ── */
+        vFrameBtn.addEventListener('click', function(){
+          var videoSrc = _blobVideo[idx] ? _blobVideo[idx].url : (loadData()[idx] || {}).video || '';
+          if (!videoSrc) { alert('No hay video cargado'); return; }
+          vFrameBtn.textContent = '🎞️ Capturando...';
+          captureFrameFromUrl(videoSrc, function(blob){
+            if (blob) {
+              uploadFileToServer(blob).then(function(path){
+                _blobThumb[idx] = path;
+                var dz2 = document.getElementById('aDZ' + idx);
+                var dzH2 = document.getElementById('aDHint' + idx);
+                dz2.style.backgroundImage = "url('" + path + "')";
+                dzH2.style.display = 'none';
+                vFrameBtn.textContent = '🎞️ ✅ Miniatura actualizada';
+                _hasUnsaved = true;
+                setTimeout(function(){ vFrameBtn.textContent = '🎞️ Usar frame como miniatura'; }, 2000);
+              }).catch(function(e){
+                vFrameBtn.textContent = '🎞️ ❌ Error';
+                setTimeout(function(){ vFrameBtn.textContent = '🎞️ Usar frame como miniatura'; }, 2000);
+              });
+            } else {
+              vFrameBtn.textContent = '🎞️ ❌ No se pudo capturar';
+              setTimeout(function(){ vFrameBtn.textContent = '🎞️ Usar frame como miniatura'; }, 2000);
+            }
           });
         });
 
