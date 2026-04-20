@@ -2040,6 +2040,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       var c = cards[i];
       var lbl = c.querySelector('.project-thumb-label');
       data.push({
+        projNum:  parseInt(c.dataset.projNum) || (i + 1),
         cat:      c.dataset.cat      || '',
         title:    c.dataset.title    || '',
         desc:     c.dataset.desc     || '',
@@ -2060,6 +2061,10 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (Array.isArray(data) && data.length > 0) {
+          /* Ensure every project has a projNum */
+          data.forEach(function(p, i) {
+            if (!p.projNum) p.projNum = i + 1;
+          });
           _cachedData = data;
           applyData(data);
           if (callback) callback(data);
