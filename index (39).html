@@ -2121,6 +2121,12 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       c.dataset.modalImg = p.modalImg || '';
       c.dataset.thumb    = p.thumb || '';
       c.dataset.projNum  = p.projNum || (i + 1);
+
+      /* Save original CMS values so i18n logic doesn't destroy them when switching languages */
+      c.dataset.origTitle = p.title || '';
+      c.dataset.origDesc  = p.desc || '';
+      c.dataset.origLabel = p.label || p.cat || '';
+
       var bg = c.querySelector('.project-thumb-bg');
       if (bg && p.thumb) bg.style.backgroundImage = "url('" + p.thumb + "')";
       var thumbImg = c.querySelector('.project-thumb-img');
@@ -2723,6 +2729,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
   window.deleteProject = deleteProject;
   window.saveAllProjects = saveAllProjects;
   window.applyData = applyData;
+  window.fetchProjectsFromServer = fetchProjectsFromServer;
 
   window.switchAdminTab = function(tab) {
     // Sidebar nav highlighting
@@ -3175,16 +3182,9 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
 
 /* ── Load projects from SERVER on page init ── */
 (function(){
-  fetch('/api/projects')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (Array.isArray(data) && data.length > 0) {
-        if(window.applyData) window.applyData(data);
-      }
-    })
-    .catch(function(err) {
-      console.warn('Servidor no disponible, usando proyectos del HTML:', err.message);
-    });
+  if (typeof window.fetchProjectsFromServer === 'function') {
+    window.fetchProjectsFromServer();
+  }
 })();
 </script>
 
@@ -3325,14 +3325,28 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       });
     });
 
-    /* Project cards — use data-proj-num for translation key instead of DOM index */
+    /* Project cards — respect CMS values in Spanish */
     document.querySelectorAll('.project-card').forEach(function(card, i){
       var n = parseInt(card.dataset.projNum) || (i + 1);
-      var ti = t['proj.'+n+'.title'], de = t['proj.'+n+'.desc'],
-          ho = t['proj.'+n+'.hover'], ct = t['proj.cta'], lb = t['proj'+n+'.label'];
+      var ti, de, ho, ct, lb;
+
+      if (lang === 'es') {
+        ti = card.dataset.origTitle;
+        de = card.dataset.origDesc;
+        ho = card.dataset.origDesc;
+        lb = card.dataset.origLabel;
+        ct = t['proj.cta'];
+      } else {
+        ti = t['proj.'+n+'.title'] || card.dataset.origTitle;
+        de = t['proj.'+n+'.desc']  || card.dataset.origDesc;
+        ho = t['proj.'+n+'.hover'] || card.dataset.origDesc;
+        lb = t['proj'+n+'.label']  || card.dataset.origLabel;
+        ct = t['proj.cta'];
+      }
+
       if(ti){ card.dataset.title = ti; var e=card.querySelector('.project-hover-title'); if(e) e.textContent=ti; }
       if(de) card.dataset.desc = de;
-      if(ho){ var e=card.querySelector('.project-hover-desc'); if(e) e.textContent=ho; }
+      if(ho){ var e=card.querySelector('.project-hover-desc'); if(e) e.textContent=(ho.substring(0, 90) + (ho.length > 90 ? '...' : '')); }
       if(ct){ var e=card.querySelector('.project-hover-cta'); if(e) e.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg> '+ct; }
       if(lb){ var e=card.querySelector('.project-thumb-label'); if(e) e.textContent=lb; }
     });
