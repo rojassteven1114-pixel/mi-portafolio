@@ -2115,6 +2115,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       c.dataset.video    = p.video || '';
       c.dataset.modalImg = p.modalImg || '';
       c.dataset.thumb    = p.thumb || '';
+      c.dataset.projNum  = p.projNum || (i + 1);
       var bg = c.querySelector('.project-thumb-bg');
       if (bg && p.thumb) bg.style.backgroundImage = "url('" + p.thumb + "')";
       var thumbImg = c.querySelector('.project-thumb-img');
@@ -2573,6 +2574,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
     }
 
     data[idx] = {
+      projNum:  p.projNum || (idx + 1),
       label:    document.getElementById('aTitle'+idx).value,
       cat:      document.getElementById('aCat'  +idx).value,
       title:    document.getElementById('aTitle'+idx).value,
@@ -3318,9 +3320,9 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       });
     });
 
-    /* Project cards */
+    /* Project cards — use data-proj-num for translation key instead of DOM index */
     document.querySelectorAll('.project-card').forEach(function(card, i){
-      var n = i + 1;
+      var n = parseInt(card.dataset.projNum) || (i + 1);
       var ti = t['proj.'+n+'.title'], de = t['proj.'+n+'.desc'],
           ho = t['proj.'+n+'.hover'], ct = t['proj.cta'], lb = t['proj'+n+'.label'];
       if(ti){ card.dataset.title = ti; var e=card.querySelector('.project-hover-title'); if(e) e.textContent=ti; }
