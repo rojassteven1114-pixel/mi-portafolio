@@ -2127,6 +2127,10 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       c.dataset.origDesc  = p.desc || '';
       c.dataset.origLabel = p.label || p.cat || '';
 
+      /* Store EN translations from database */
+      c.dataset.titleEn = p.title_en || '';
+      c.dataset.descEn  = p.desc_en  || '';
+
       var bg = c.querySelector('.project-thumb-bg');
       if (bg && p.thumb) bg.style.backgroundImage = "url('" + p.thumb + "')";
       var thumbImg = c.querySelector('.project-thumb-img');
@@ -2255,12 +2259,20 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
           '</div>' +
           '<input type="file" id="aThumbFile'+idx+'" accept="image/*" style="display:none"/>' +
           /* Text fields */
-          '<div class="admin-field"><span class="admin-label">Título</span>' +
+          '<div class="admin-field"><span class="admin-label">Título (ES)</span>' +
           '<input class="admin-input" id="aTitle'+idx+'" value="'+esc(p.title)+'"/></div>' +
           '<div class="admin-field"><span class="admin-label">Categoría</span>' +
           '<input class="admin-input" id="aCat'+idx+'" value="'+esc(p.cat)+'"/></div>' +
-          '<div class="admin-field"><span class="admin-label">Descripción</span>' +
+          '<div class="admin-field"><span class="admin-label">Descripción (ES)</span>' +
           '<textarea class="admin-textarea" id="aDesc'+idx+'">'+esc(p.desc)+'</textarea></div>' +
+          /* EN translation fields */
+          '<div style="border-left:3px solid #3b82f6;padding-left:10px;margin:8px 0;">' +
+            '<div class="admin-field"><span class="admin-label" style="color:#60a5fa;">🌐 Title (EN)</span>' +
+            '<input class="admin-input" id="aTitleEn'+idx+'" value="'+esc(p.title_en || '')+'"/></div>' +
+            '<div class="admin-field"><span class="admin-label" style="color:#60a5fa;">🌐 Description (EN)</span>' +
+            '<textarea class="admin-textarea" id="aDescEn'+idx+'">'+esc(p.desc_en || '')+'</textarea></div>' +
+            '<button class="admin-pick-btn" id="aAutoTranslate'+idx+'" style="background:#3b82f6;color:#fff;cursor:pointer;border:none;padding:6px 14px;border-radius:4px;font-size:.75rem;margin-bottom:6px;">🔄 Auto-traducir al inglés</button>' +
+          '</div>' +
           '<div class="admin-field"><span class="admin-label">Tags (coma separados)</span>' +
           '<input class="admin-input" id="aTags'+idx+'" value="'+esc(p.tags)+'"/></div>' +
           /* Carousel pages */
@@ -2273,7 +2285,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
           '<label class="admin-pick-btn" for="aVideoFile'+idx+'">Seleccionar</label></span>' +
           '<input type="file" id="aVideoFile'+idx+'" accept="video/*" style="display:none"/>' +
           '<div style="display:flex;align-items:center;gap:8px">' +
-            '<div class="admin-video-name" id="aVName'+idx+'" style="flex:1">'+(p.video?'📹 '+ (p.video.length > 50 ? p.video.substring(p.video.lastIndexOf('/')+1) : p.video):'')+'</div>' +
+            '<div class="admin-video-name" id="aVName'+idx+'" style="flex:1">'+(p.video?'📹 '+ (p.video.length > 50 ? p.video.substring(p.video.lastIndexOf('/')+1) : p.video):'')+' </div>' +
             '<button class="admin-pick-btn" id="aVDel'+idx+'" style="background:#e74c3c;color:#fff;cursor:pointer;border:none;padding:4px 10px;border-radius:4px;font-size:.75rem;'+(p.video?'':'display:none;')+'" title="Eliminar video">✕ Quitar</button>' +
           '</div>' +
           '<button class="admin-pick-btn" id="aVFrame'+idx+'" style="margin-top:6px;background:#2ecc71;color:#fff;cursor:pointer;border:none;padding:6px 12px;border-radius:4px;font-size:.75rem;'+(p.video?'':'display:none;')+'" title="Usar un frame del video como miniatura">🎞️ Usar frame como miniatura</button>' +
@@ -2491,6 +2503,42 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
           inp.addEventListener('input', function(){ _hasUnsaved = true; });
         });
 
+        /* ── Auto-translate button ── */
+        document.getElementById('aAutoTranslate' + idx).addEventListener('click', function(){
+          var titleEs = document.getElementById('aTitle' + idx).value;
+          var descEs  = document.getElementById('aDesc'  + idx).value;
+          var btn = this;
+          btn.textContent = '🔄 Traduciendo...';
+          btn.disabled = true;
+
+          var done = 0, total = 0;
+          function checkDone() {
+            done++;
+            if (done >= total) {
+              btn.textContent = '✅ Traducido';
+              btn.disabled = false;
+              _hasUnsaved = true;
+              setTimeout(function(){ btn.textContent = '🔄 Auto-traducir al inglés'; }, 2500);
+            }
+          }
+          function translateText(text, targetEl) {
+            if (!text.trim()) { targetEl.value = ''; checkDone(); return; }
+            fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=es|en')
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                if (data.responseData && data.responseData.translatedText) {
+                  targetEl.value = data.responseData.translatedText;
+                }
+                checkDone();
+              })
+              .catch(function() { checkDone(); });
+          }
+
+          total = 2;
+          translateText(titleEs, document.getElementById('aTitleEn' + idx));
+          translateText(descEs,  document.getElementById('aDescEn'  + idx));
+        });
+
         /* ── Save single ── */
         document.getElementById('aSave' + idx).onclick = function() {
           saveSingleProject(idx, false);
@@ -2584,12 +2632,20 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       modalImgVal = firstPage.trim();
     }
 
+    /* EN translation fields — read from admin inputs, fallback to existing */
+    var titleEnEl = document.getElementById('aTitleEn'+idx);
+    var descEnEl  = document.getElementById('aDescEn'+idx);
+    var titleEnVal = titleEnEl ? titleEnEl.value : (p.title_en || '');
+    var descEnVal  = descEnEl  ? descEnEl.value  : (p.desc_en  || '');
+
     data[idx] = {
       projNum:  p.projNum || (idx + 1),
       label:    document.getElementById('aTitle'+idx).value,
       cat:      document.getElementById('aCat'  +idx).value,
       title:    document.getElementById('aTitle'+idx).value,
       desc:     document.getElementById('aDesc' +idx).value,
+      title_en: titleEnVal,
+      desc_en:  descEnVal,
       tags:     document.getElementById('aTags'+idx).value,
       thumb:    thumbVal,
       modalImg: modalImgVal,
@@ -3325,7 +3381,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       });
     });
 
-    /* Project cards — respect CMS values in Spanish */
+    /* Project cards — dynamic bilingual using stored EN translations */
     document.querySelectorAll('.project-card').forEach(function(card, i){
       var n = parseInt(card.dataset.projNum) || (i + 1);
       var ti, de, ho, ct, lb;
@@ -3337,26 +3393,25 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
         lb = card.dataset.origLabel;
         ct = t['proj.cta'];
       } else {
-        // En inglés, revisamos si el usuario modificó el texto del CMS respecto al original en español
-        var esOrigTi = T['es']['proj.'+n+'.title'];
-        var esOrigDe = T['es']['proj.'+n+'.desc'];
-        
-        var isModified = (esOrigTi && card.dataset.origTitle !== esOrigTi) || 
-                         (esOrigDe && card.dataset.origDesc !== esOrigDe);
+        /* EN: use dynamic stored translation if available, then hardcoded fallback, then ES */
+        var storedTitleEn = card.dataset.titleEn;
+        var storedDescEn  = card.dataset.descEn;
 
-        if (isModified || !t['proj.'+n+'.title']) {
-          // Si el usuario escribió un proyecto nuevo, usamos su texto (no la traducción en inglés)
-          ti = card.dataset.origTitle;
-          de = card.dataset.origDesc;
-          ho = card.dataset.origDesc;
-          lb = card.dataset.origLabel;
+        if (storedTitleEn) {
+          ti = storedTitleEn;
         } else {
-          // Si es el proyecto default, usamos la traducción en inglés
-          ti = t['proj.'+n+'.title'];
-          de = t['proj.'+n+'.desc'];
-          ho = t['proj.'+n+'.hover'];
-          lb = t['proj'+n+'.label'];
+          ti = t['proj.'+n+'.title'] || card.dataset.origTitle;
         }
+
+        if (storedDescEn) {
+          de = storedDescEn;
+          ho = storedDescEn;
+        } else {
+          de = t['proj.'+n+'.desc']  || card.dataset.origDesc;
+          ho = t['proj.'+n+'.hover'] || card.dataset.origDesc;
+        }
+
+        lb = t['proj'+n+'.label'] || card.dataset.origLabel;
         ct = t['proj.cta'];
       }
 
