@@ -2130,6 +2130,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       /* Store EN translations from database */
       c.dataset.titleEn = p.title_en || '';
       c.dataset.descEn  = p.desc_en  || '';
+      c.dataset.labelEn = p.label_en || '';
 
       var bg = c.querySelector('.project-thumb-bg');
       if (bg && p.thumb) bg.style.backgroundImage = "url('" + p.thumb + "')";
@@ -2261,6 +2262,8 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
           /* Text fields */
           '<div class="admin-field"><span class="admin-label">Título (ES)</span>' +
           '<input class="admin-input" id="aTitle'+idx+'" value="'+esc(p.title)+'"/></div>' +
+          '<div class="admin-field"><span class="admin-label">Etiqueta (ES) <small style="opacity:.5">— texto corto en la tarjeta</small></span>' +
+          '<input class="admin-input" id="aLabel'+idx+'" value="'+esc(p.label || p.cat || '')+'"/></div>' +
           '<div class="admin-field"><span class="admin-label">Categoría</span>' +
           '<input class="admin-input" id="aCat'+idx+'" value="'+esc(p.cat)+'"/></div>' +
           '<div class="admin-field"><span class="admin-label">Descripción (ES)</span>' +
@@ -2269,6 +2272,8 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
           '<div style="border-left:3px solid #3b82f6;padding-left:10px;margin:8px 0;">' +
             '<div class="admin-field"><span class="admin-label" style="color:#60a5fa;">🌐 Title (EN)</span>' +
             '<input class="admin-input" id="aTitleEn'+idx+'" value="'+esc(p.title_en || '')+'"/></div>' +
+            '<div class="admin-field"><span class="admin-label" style="color:#60a5fa;">🌐 Label (EN) <small style="opacity:.5">— short card tag</small></span>' +
+            '<input class="admin-input" id="aLabelEn'+idx+'" value="'+esc(p.label_en || '')+'"/></div>' +
             '<div class="admin-field"><span class="admin-label" style="color:#60a5fa;">🌐 Description (EN)</span>' +
             '<textarea class="admin-textarea" id="aDescEn'+idx+'">'+esc(p.desc_en || '')+'</textarea></div>' +
             '<button class="admin-pick-btn" id="aAutoTranslate'+idx+'" style="background:#3b82f6;color:#fff;cursor:pointer;border:none;padding:6px 14px;border-radius:4px;font-size:.75rem;margin-bottom:6px;">🔄 Auto-traducir al inglés</button>' +
@@ -2534,8 +2539,10 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
               .catch(function() { checkDone(); });
           }
 
-          total = 2;
+          var labelEs = document.getElementById('aLabel' + idx).value;
+          total = 3;
           translateText(titleEs, document.getElementById('aTitleEn' + idx));
+          translateText(labelEs, document.getElementById('aLabelEn' + idx));
           translateText(descEs,  document.getElementById('aDescEn'  + idx));
         });
 
@@ -2635,17 +2642,24 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
     /* EN translation fields — read from admin inputs, fallback to existing */
     var titleEnEl = document.getElementById('aTitleEn'+idx);
     var descEnEl  = document.getElementById('aDescEn'+idx);
+    var labelEnEl = document.getElementById('aLabelEn'+idx);
     var titleEnVal = titleEnEl ? titleEnEl.value : (p.title_en || '');
     var descEnVal  = descEnEl  ? descEnEl.value  : (p.desc_en  || '');
+    var labelEnVal = labelEnEl ? labelEnEl.value  : (p.label_en || '');
+
+    /* Label field — dedicated short tag for the card */
+    var labelEl = document.getElementById('aLabel'+idx);
+    var labelVal = labelEl ? labelEl.value : (p.label || p.cat || '');
 
     data[idx] = {
       projNum:  p.projNum || (idx + 1),
-      label:    document.getElementById('aTitle'+idx).value,
+      label:    labelVal,
       cat:      document.getElementById('aCat'  +idx).value,
       title:    document.getElementById('aTitle'+idx).value,
       desc:     document.getElementById('aDesc' +idx).value,
       title_en: titleEnVal,
       desc_en:  descEnVal,
+      label_en: labelEnVal,
       tags:     document.getElementById('aTags'+idx).value,
       thumb:    thumbVal,
       modalImg: modalImgVal,
@@ -3411,7 +3425,8 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
           ho = t['proj.'+n+'.hover'] || card.dataset.origDesc;
         }
 
-        lb = t['proj'+n+'.label'] || card.dataset.origLabel;
+        var storedLabelEn = card.dataset.labelEn;
+        lb = storedLabelEn || t['proj'+n+'.label'] || card.dataset.origLabel;
         ct = t['proj.cta'];
       }
 
