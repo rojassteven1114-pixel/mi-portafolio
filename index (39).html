@@ -3337,10 +3337,26 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
         lb = card.dataset.origLabel;
         ct = t['proj.cta'];
       } else {
-        ti = t['proj.'+n+'.title'] || card.dataset.origTitle;
-        de = t['proj.'+n+'.desc']  || card.dataset.origDesc;
-        ho = t['proj.'+n+'.hover'] || card.dataset.origDesc;
-        lb = t['proj'+n+'.label']  || card.dataset.origLabel;
+        // En inglés, revisamos si el usuario modificó el texto del CMS respecto al original en español
+        var esOrigTi = T['es']['proj.'+n+'.title'];
+        var esOrigDe = T['es']['proj.'+n+'.desc'];
+        
+        var isModified = (esOrigTi && card.dataset.origTitle !== esOrigTi) || 
+                         (esOrigDe && card.dataset.origDesc !== esOrigDe);
+
+        if (isModified || !t['proj.'+n+'.title']) {
+          // Si el usuario escribió un proyecto nuevo, usamos su texto (no la traducción en inglés)
+          ti = card.dataset.origTitle;
+          de = card.dataset.origDesc;
+          ho = card.dataset.origDesc;
+          lb = card.dataset.origLabel;
+        } else {
+          // Si es el proyecto default, usamos la traducción en inglés
+          ti = t['proj.'+n+'.title'];
+          de = t['proj.'+n+'.desc'];
+          ho = t['proj.'+n+'.hover'];
+          lb = t['proj'+n+'.label'];
+        }
         ct = t['proj.cta'];
       }
 
