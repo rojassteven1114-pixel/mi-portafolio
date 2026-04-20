@@ -1114,7 +1114,7 @@
     <!-- Media area with inner page arrows -->
     <div class="modal-media">
       <img class="modal-thumb" id="modalThumb" src="" alt="" style="display:none;"/>
-      <video class="modal-video" id="modalVideo" controls style="display:none;"></video>
+      <video class="modal-video" id="modalVideo" controls playsinline preload="metadata" style="display:none;"></video>
       <!-- Inner carousel page arrows -->
       <button class="modal-page-arrow hidden" id="modalPagePrev" aria-label="Página anterior">
         <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
@@ -1774,7 +1774,11 @@ function renderModal() {
   if (isVideo) {
     modalThumb.style.display = 'none';
     modalVideo.style.display = 'block';
-    modalVideo.src = card.dataset.video;
+    var rawVid = card.dataset.video || '';
+    if (rawVid.indexOf('cloudinary.com') !== -1 && rawVid.indexOf('/upload/v') !== -1) {
+      rawVid = rawVid.replace('/upload/v', '/upload/q_auto,f_auto,vc_auto/v');
+    }
+    modalVideo.src = rawVid;
     modalVideo.load();
     modalVideo.addEventListener('canplay', function onCanPlay(){
       modalVideo.play();
