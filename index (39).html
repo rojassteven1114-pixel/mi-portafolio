@@ -36,6 +36,11 @@
 
     .cursor-dot { position:fixed; z-index:9999; top:0; left:0; width:7px; height:7px; background:var(--purple); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); }
     .cursor-ring { position:fixed; z-index:9998; top:0; left:0; width:30px; height:30px; border:1px solid var(--purple-dim); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); transition:width .28s,height .28s,border-color .28s; }
+    @media (pointer:coarse), (max-width:768px) {
+      body { cursor:auto !important; }
+      * { cursor:auto !important; }
+      .cursor-dot, .cursor-ring { display:none !important; }
+    }
 
     /* ── HEADER ── */
     header {
@@ -1684,13 +1689,17 @@
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ---- Cursor ---- */
 const dot=document.getElementById('cursorDot'),ring=document.getElementById('cursorRing');
-let mx=0,my=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
-(function r(){const rx=parseFloat(ring.style.left)||0,ry=parseFloat(ring.style.top)||0;ring.style.left=(rx+(mx-rx)*.14)+'px';ring.style.top=(ry+(my-ry)*.14)+'px';requestAnimationFrame(r);})();
-document.querySelectorAll('a,button,.project-card').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{ring.style.width='46px';ring.style.height='46px';ring.style.borderColor='var(--purple)';});
-  el.addEventListener('mouseleave',()=>{ring.style.width='30px';ring.style.height='30px';ring.style.borderColor='var(--purple-dim)';});
-});
+if(!window.matchMedia('(pointer:coarse)').matches && window.innerWidth > 768) {
+  let mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+  (function r(){const rx=parseFloat(ring.style.left)||0,ry=parseFloat(ring.style.top)||0;ring.style.left=(rx+(mx-rx)*.14)+'px';ring.style.top=(ry+(my-ry)*.14)+'px';requestAnimationFrame(r);})();
+  document.querySelectorAll('a,button,.project-card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ring.style.width='46px';ring.style.height='46px';ring.style.borderColor='var(--purple)';});
+    el.addEventListener('mouseleave',()=>{ring.style.width='30px';ring.style.height='30px';ring.style.borderColor='var(--purple-dim)';});
+  });
+} else {
+  dot.style.display='none'; ring.style.display='none';
+}
 
 /* ---- Header scroll + active nav ---- */
 const headerEl = document.getElementById('siteHeader');
