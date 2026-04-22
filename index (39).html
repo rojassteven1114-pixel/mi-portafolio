@@ -2472,7 +2472,7 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
 
         /* ── Delete video button ── */
         vDelBtn.addEventListener('click', function(){
-          delete _blobVideo[idx];
+          _blobVideo[idx] = '__DELETED__';
           vName.textContent = '';
           vDelBtn.style.display = 'none';
           vFrameBtn.style.display = 'none';
@@ -2633,8 +2633,15 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       pagesVal = p.pages || '';
     }
 
-    /* Video: use new upload if available, otherwise keep existing */
-    var videoVal = (_blobVideo[idx] ? _blobVideo[idx].url : '') || p.video || '';
+    /* Video: use new upload if available; '__DELETED__' sentinel means user explicitly removed it */
+    var videoVal;
+    if (_blobVideo[idx] === '__DELETED__') {
+      videoVal = '';
+    } else if (_blobVideo[idx] && _blobVideo[idx].url) {
+      videoVal = _blobVideo[idx].url;
+    } else {
+      videoVal = p.video || '';
+    }
 
     /* modalImg: use thumb as fallback, or first page if available */
     var modalImgVal = thumbVal;
@@ -2804,6 +2811,41 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
   window.saveAllProjects = saveAllProjects;
   window.applyData = applyData;
   window.fetchProjectsFromServer = fetchProjectsFromServer;
+
+  window.addBlankProject = function(callback) {
+    var data = loadData();
+    data.push({
+      projNum: data.length + 1,
+      cat: 'Nuevo',
+      title: 'Nuevo Proyecto',
+      label: 'Nuevo',
+      desc: 'Edita desde el panel de admin.',
+      title_en: '',
+      desc_en: '',
+      label_en: '',
+      tags: '',
+      thumb: '',
+      modalImg: '',
+      pages: '',
+      video: ''
+    });
+    _cachedData = data;
+    
+    /* Save to server and rebuild UI */
+    saveAllProjects(function() {
+      applyData(data);
+      if(window.bindCards) window.bindCards();
+      buildGrid();
+      
+      /* Scroll to bottom of admin */
+      setTimeout(function() {
+        var content = document.querySelector('.admin-content');
+        if(content) content.scrollTop = content.scrollHeight;
+      }, 50);
+      
+      if(callback) callback();
+    });
+  };
 
   window.switchAdminTab = function(tab) {
     // Sidebar nav highlighting
@@ -3205,52 +3247,14 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
     addBtn.style.background='rgba(155,89,245,.15)'; addBtn.style.borderColor='var(--purple-dim)';
   });
   addBtn.onclick = function(){
-    var grid = document.getElementById('adminGrid');
-    if(!grid) return;
-    
-    // Add new blank HTML card to the portfolio grid
-    var projGrid = document.querySelector('.projects-grid');
-    if(projGrid){
-      var newCard = document.createElement('div');
-      newCard.className = 'project-card reveal';
-      newCard.dataset.cat = 'Nuevo'; newCard.dataset.title = 'Nuevo Proyecto';
-      newCard.dataset.desc = ''; newCard.dataset.tags = '';
-      newCard.dataset.modalImg = ''; newCard.dataset.pages = ''; newCard.dataset.video = '';
-      newCard.dataset.thumb = '';
-      newCard.innerHTML =
-        '<img class="project-thumb-img" src="" alt="" style="display:none;" onerror="this.parentElement.querySelector(\'.project-thumb-fallback\')&&(this.style.display=\'none\')"/>' +
-        '<div class="project-thumb-bg project-thumb-fallback" style="aspect-ratio:4/3;background:linear-gradient(135deg,#100a28,#1a0c38);"></div>' +
-        '<span class="project-thumb-label">Nuevo</span>' +
-        '<div class="project-hover"></div>' +
-        '<div class="project-info-bar">' +
-          '<div class="project-cat-tag">Nuevo</div>' +
-          '<div class="project-hover-title">Nuevo Proyecto</div>' +
-          '<div class="project-hover-desc">Edita desde el panel de admin.</div>' +
-          '<span class="project-hover-cta"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Ver proyecto</span>' +
-        '</div>';
-      projGrid.appendChild(newCard);
-      newCard.addEventListener('click', function(){ if(window.openModal) window.openModal(newCard); });
-      if(window.bindCards) window.bindCards();
+    if(typeof window.addBlankProject === 'function') {
+      window.addBlankProject(function() {
+        addBtn.textContent = '✅ Proyecto añadido';
+        setTimeout(function(){
+          addBtn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo proyecto';
+        }, 2000);
+      });
     }
-    
-    // Add to in-memory cache and save to server immediately
-    if(typeof window.saveAllProjects === 'function') {
-      window.saveAllProjects();
-    }
-    
-    // Rebuild admin grid to include new slot
-    if(typeof window.buildGrid === 'function') window.buildGrid();
-    
-    // Scroll to the bottom of the admin content area
-    setTimeout(function() {
-      var content = document.querySelector('.admin-content');
-      if(content) content.scrollTop = content.scrollHeight;
-    }, 50);
-
-    addBtn.textContent = '✅ Proyecto añadido';
-    setTimeout(function(){
-      addBtn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo proyecto';
-    }, 2000);
   };
 })();
 
