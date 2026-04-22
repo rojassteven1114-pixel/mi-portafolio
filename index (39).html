@@ -2830,20 +2830,40 @@ overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); 
       video: ''
     });
     _cachedData = data;
-    
-    /* Save to server and rebuild UI */
-    saveAllProjects(function() {
-      applyData(data);
-      if(window.bindCards) window.bindCards();
-      buildGrid();
-      
-      /* Scroll to bottom of admin */
-      setTimeout(function() {
-        var content = document.querySelector('.admin-content');
-        if(content) content.scrollTop = content.scrollHeight;
-      }, 50);
-      
-      if(callback) callback();
+
+    /* Save directly to server (can't use saveAllProjects because
+       the new project has no admin form inputs yet) */
+    fetch('/api/projects', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: PASS, projects: data })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.success) {
+        console.log('✅ Nuevo proyecto creado y guardado en servidor');
+        /* Apply to DOM, rebuild admin grid */
+        applyData(data);
+        if(window.bindCards) window.bindCards();
+        /* Clear blob caches for clean rebuild */
+        _blobThumb = {}; _blobPages = {}; _blobVideo = {};
+        buildGrid();
+
+        /* Scroll to bottom of admin */
+        setTimeout(function() {
+          var content = document.querySelector('.admin-content');
+          if(content) content.scrollTop = content.scrollHeight;
+        }, 50);
+
+        _hasUnsaved = false;
+        if(callback) callback();
+      } else {
+        alert('Error al crear proyecto: ' + (res.error || 'Desconocido'));
+      }
+    })
+    .catch(function(err) {
+      console.error('Error de red al crear proyecto:', err);
+      alert('Error de conexión al crear proyecto.');
     });
   };
 
